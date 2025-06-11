@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <style>
+      .table {
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-container {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        min-width: 380px;
+        text-align: center;
+      }
+
+      h2 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+
+      <div class="login-container">
+        <h2>Enter G Pass No</h2>
+        <form id="searchForm">
+          <!-- Update action here -->
+          <div class="input-group mb-3">
+            <input type="text" id="gpassNoInput" class="form-control" placeholder="G Pass No" aria-label="G Pass No">
+            <button class="btn btn-outline-secondary" type="button" id="button-search">Search</button>
+          </div>
+          <div id="loadingMessage"></div>
+        </form>
+      </div>
+
+      <!-- <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">S.No</th>
+            <th scope="col">Worker Name</th>
+            <th scope="col">E code</th>
+            <th scope="col">E date</th>
+            <th scope="col">Gpass No</th>
+            <th scope="col">Worker desig</th>
+            <th scope="col">Worker agency</th>
+            <th scope="col">Gpass expiry dt</th>
+            <th scope="col">Time from</th>
+            <th scope="col">Time to</th>
+            <th scope="col">Work area</th>
+            <th scope="col">view</th>
+          </tr>
+        </thead>
+        <tbody id="table-content">
+        </tbody>
+      </table> -->
+    </div>
+
+    <!-- Bootstrap Modal -->
+    <div
+      class="modal fade"
+      id="userModal"
+      tabindex="-1"
+      aria-labelledby="userModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="userModalLabel">User Details</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div id="modal-content">
+                  <!-- User details will be inserted here by JavaScript -->
+              </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+      </div>
+      </div>
+
+    <script>
+
+document.getElementById('button-search').addEventListener('click', async () => {
+    const gpassNo = document.getElementById('gpassNoInput').value;
+    const loadingMessage = document.getElementById('loadingMessage');
+    if (gpassNo) {
+      loadingMessage.innerHTML = 'Loading...'; // Show loading message
+        try {
+            const response = await fetch(`/api/users?gpass_no=${encodeURIComponent(gpassNo)}`);
+            const data = await response.json();
+
+            if (data.length > 0) {
+                const user = data[0];
+                const modalContent = document.getElementById('modal-content');
+                modalContent.innerHTML = `
+                    <p><strong>S.No:</strong> ${user.sno}</p>
+                    <p><strong>Worker Name:</strong> ${user.worker_name}</p>
+                    <p><strong>E Code:</strong> ${user.e_code}</p>
+                    <p><strong>E Date:</strong> ${user.e_date}</p>
+                    <p><strong>Gpass No:</strong> ${user.gpass_no}</p>
+                    <p><strong>Worker Designation:</strong> ${user.worker_desig}</p>
+                    <p><strong>Worker Agency:</strong> ${user.worker_agency}</p>
+                    <p><strong>Gpass Expiry Date:</strong> ${user.gpass_expiry_dt}</p>
+                    <p><strong>Time From:</strong> ${user.time_from}</p>
+                    <p><strong>Time To:</strong> ${user.time_to}</p>
+                    <p><strong>Work Area:</strong> ${user.work_area}</p>
+                `;
+
+                const userModal = new bootstrap.Modal(document.getElementById('userModal'));
+                userModal.show();
+            } else {
+                alert('No user found with the provided G Pass No.');
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }finally {
+            loadingMessage.innerHTML = ''; // Clear loading message
+        }
+      } else {
+        alert('Please enter a G Pass No.');
+      }
+    });
+      // document.addEventListener("DOMContentLoaded", async () => {
+      //   try {
+      //     const response = await fetch("/api/users");
+      //     const data = await response.json();
+      //     const tableContent = document.getElementById("table-content");
+      //     tableContent.innerHTML = "";
+
+      //     data.forEach((row) => {
+      //       const tableRow = document.createElement("tr");
+
+      //       tableRow.innerHTML = `
+      //               <td>${row.sno}</td>
+      //               <td>${row.worker_name}</td>
+      //               <td>${row.e_code}</td>
+      //               <td>${row.e_date}</td>
+      //               <td>${row.gpass_no}</td>
+      //               <td>${row.worker_desig}</td>
+      //               <td>${row.worker_agency}</td>
+      //               <td>${row.gpass_expiry_dt}</td>
+      //               <td>${row.time_from}</td>
+      //               <td>${row.time_to}</td>
+      //               <td>${row.work_area}</td>
+      //               <td><button type="button" class="btn btn-link view-btn" data-id="${row.sno}" data-bs-toggle="modal" data-bs-target="#userModal">View</button></td>
+      //           `;
+
+      //       tableContent.appendChild(tableRow);
+
+      //       document.querySelectorAll(".view-btn").forEach((button) => {
+      //         button.addEventListener("click", (event) => {
+      //           const userId = event.target.getAttribute("data-id");
+      //           const user = data.find((u) => u.sno == userId);
+
+      //           // Populate modal with user data
+      //           document.getElementById(
+      //             "modal-sno"
+      //           ).innerText = `S.No: ${user.sno}`;
+      //           document.getElementById(
+      //             "modal-worker-name"
+      //           ).innerText = `Worker Name: ${user.worker_name}`;
+      //           document.getElementById(
+      //             "modal-e-code"
+      //           ).innerText = `E code: ${user.e_code}`;
+      //           document.getElementById(
+      //             "modal-e-date"
+      //           ).innerText = `E date: ${user.e_date}`;
+      //           document.getElementById(
+      //             "modal-gpass-no"
+      //           ).innerText = `Gpass No: ${user.gpass_no}`;
+      //           document.getElementById(
+      //             "modal-worker-desig"
+      //           ).innerText = `Worker desig: ${user.worker_desig}`;
+      //           document.getElementById(
+      //             "modal-worker-agency"
+      //           ).innerText = `Worker agency: ${user.worker_agency}`;
+      //           document.getElementById(
+      //             "modal-gpass-expiry-dt"
+      //           ).innerText = `Gpass expiry dt: ${user.gpass_expiry_dt}`;
+      //           document.getElementById(
+      //             "modal-time-from"
+      //           ).innerText = `Time from: ${user.time_from}`;
+      //           document.getElementById(
+      //             "modal-time-to"
+      //           ).innerText = `Time to: ${user.time_to}`;
+      //           document.getElementById(
+      //             "modal-work-area"
+      //           ).innerText = `Work area: ${user.work_area}`;
+      //         });
+      //       });
+      //     });
+      //   } catch (error) {
+      //     console.error("Error fetching data:", error);
+      //   }
+      // });
+    </script>
+  </body>
+</html>
